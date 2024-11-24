@@ -7,8 +7,9 @@ export const register = async (req, res) => {
 
   try {
     //hash the password
-
     const hassedPassword = await bcrypt.hash(password, 10);
+
+
     // create a new user and save it to db
     const newUser = await prisma.user.create({
       data: {
@@ -45,11 +46,11 @@ export const login = async (req, res) => {
 
 
         // generate cookie and send to the user
+        const age = 1000*60*60*24*7;
         const token = jwt.sign({
             id: user.id
-        })
-        const age = 1000*60*60*24*7;
-        res.cookie("test2", "myValue2", {
+        }, process.env.JWT_SECRET_KEY, {expiresIn: age})
+        res.cookie("token", token, {
             httpOnly: true,
             // secure: true,
             maxAge: age,
@@ -67,5 +68,7 @@ export const login = async (req, res) => {
 };
 
 export const logout = (req, res) => {
-  // db operations
+  res.clearCookie("token").status(200).json({
+    message: "Logout Sucessfull"
+  })
 };
